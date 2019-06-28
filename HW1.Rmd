@@ -1,0 +1,181 @@
+---
+title: "Assignment 1"
+author: "MSBX-5310 (Customer Analytics)"
+#output: pdf_document
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+setwd("~/Desktop/MSBX5310 Customer Analytics/")
+```
+
+# Overview
+The data sets used for this assignment are the same that as the ones we used in the in-class consulting project -- Dating-men.csv and Dating-women.csv. Your in-class work was focused on the women's dataset. Here you will mainly work with the men's data.  As with the women's data, here your goal is to understand what drives men's popularity on the dating website.
+
+As a recap, the data were obtained from the user records of a large US dating website. We have information on how many "first-contact" e-mails a user received during a specific time period. A first-contact e-mail is an unsolicited e-mail from some other user on the site. We also have information describing the users, such as a rating of her or his looks based on the posted profile picture(s), height, body mass index, education level (measured by years of schooling), age, and the days the user was active on the dating site during a specific observation period.
+
+- `emails`: Number of first-contact e-mails received
+- `rating`: Rating of posted picture
+- `height`: Measured in inches
+- `bmi`: Body mass index
+- `education`: Years of education
+- `age`: Age group (categorical variable). 1 = 31-35 years, 2 = 36-40 years, 3 = 41-45 years
+- `days_active`: Days user was active on the site during observation period
+
+Using the data Dating-men.csv, answer the following questions. 
+
+# Questions
+
+### Question 1 Read and summarize the data in R. (Hint: Use the describe command from the `psych` package.) 
+```{r code_1}
+rm(list = ls())
+men_DF = read.csv("Dating-Men.csv")
+head(men_DF)
+
+library(psych)
+describe(men_DF)
+```
+
+### Question 2 Compare the summary statistics (means of the different variables) for the men's data with the women's data we analyzed in class. Are they different? If so, how and on which variables? (Hint: Focus on the variables for which the means are very different. Ignore the variables with small differences in means.)
+
+Comparing the summary statistics for the men's data with the women's data, the means of emails are very different. Women receive a lot more emails (having a mean at 32.72) than men (having a mean at 7.69). Also, the men's data shows larger means of height and bmi (70.93 and 25.76 respectively) than the women's (65.19 and 22.46 respectively).   
+
+
+### Question 3 Now perform some simple exploratory analysis of the data using graphs.
+### Question 3a Plot a histogram of the number of first-contact emails that men receive. 
+
+```{r code_3a}
+hist(men_DF$emails, 
+     col = "lightskyblue2",
+     main = "Histogram of first-contact emails received", 
+     xlab = "E-mails")
+```
+### Question 3b Make a scatter plot to visualize the relationship between number of first contact emails that a man receives and his looks rating.
+
+```{r code_3b}
+plot(men_DF$rating, men_DF$emails,
+     pch = 21, lwd = 0.4, bg = "hotpink2", 
+     main = "Emails vs. Looks Rating",
+     xlab = "Looks Rating", ylab = "Emails")
+
+```
+
+### Question 3c What inferences can you draw about men's popularity from these pictorial representations of the data?
+- From these pictorial representations of the data, we can see that emails play somewhat a role in men visiting the dating site. However, there is no strong relationship between men's popularity (looks rating) and the number of first-contact emails received. 
+
+### Question 4 Now run a linear regression with emails as the dependent variable and rating as the independent variable and show the results from this regression. Also plot the regression line on the scatter plot. 
+
+```{r code_4} 
+lm_fit_1 = lm(emails ~ rating, data = men_DF)
+summary(lm_fit_1)
+
+plot(men_DF$rating, men_DF$emails,
+     pch = 21, lwd = 0.4, bg = "hotpink2", 
+     main = "Emails vs. Looks Rating",
+     xlab = "Looks Rating", ylab = "Emails")
+abline(lm_fit_1,lwd = 1.5, col = "midnightblue")
+```  
+
+### Question 5 Based on the regression results from previous question, answer the following questions:
+### Question 5a  What is the intercept and what is the coefficient of rating? Are these $\beta$s significant? How do you interpret these coefficients? 
+
+- The intercept is 8.29, indicating that if a user has a looks rating of 0 the expected number of e-mails receiced is 8.29. The coefficient of rating is 6.51, telling us that for one additional looks rating point the expected number of e-mails increases by 6.51. Since the t-statistics for the rating coefficient is large and the p-value is tiny, we reject the null hypothesis and can thus conclude that these betas are significant. 
+
+
+### Question 5b Compare the results of this regression with the results from the analogous regression on the women's data (which we analyzed in class). How does the effect of looks (rating) on women's popularity differ from the effect of looks on men's popularity. What does this comparison tell you about how women and respond to looks in the dating market? 
+
+- Comparing the results of this regression with the regression on the women's data, the effect of looks on women's popularity (having the rating coefficient at 24.25) is larger than men's (having the rating coefficient at 6.51). This comparison tells us that men pays more attention to womens' looks in the dating market. 
+
+
+### Question 6 Now run a multiple regression with emails as the dependent variable and both rating and bmi as independent variables. 
+
+```{r code_6}
+lm_fit_2 = lm(emails ~ rating + bmi, data = men_DF)
+summary(lm_fit_2)
+```
+
+### Question 6a Interpret the coefficients. 
+
+- A user has a looks rating of 0 the expected number of e-mails receiced is 5.52. For one additional looks rating point the expected number of e-mails increases by 6.63. Also, for one additional BMI point the expected number of e-mails increases by 0.11.
+
+### Question 6b Does the effect of rating change much compared to the regression with only rating as the independent variable? 
+
+- No, the effect of rating does not change much compared to the regression with only rating as the independent variable.
+
+### Question 7 Now run a multiple regression with all the continuous variables (rating, height, bmi, education, days_active) as independent variables and emails as the dependent variable. Interpret the coefficients. 
+
+```{r code_7}
+lm_fit_3 = lm(emails ~ rating + height + bmi + yrs_education + days_active, data = men_DF)
+summary(lm_fit_3)
+```
+- In this multiple regression, a user has a looks rating of 0 the expected number of e-mails receiced is -29.25. 
+  For one additional looks rating point the expected number of e-mails increases by 6.45. 
+  For one additional inch in height the expected number of e-mails increases by 0.36.
+  For one additional bmi point the expected number of e-mails increases by 0.13.
+  For one additional year of education the expected number of e-mails increases by 0.20.
+  For one additional day that user was active on site the expected number of e-mails increases by 0.07.
+  
+
+### Question 8  Include age as a *categorical* variable. I.e., run a model that includes rating, height, bmi, education, days active and age as independent variables (with age as categorical) and emails as the dependent variable. 
+
+```{r code_8}
+men_DF$age_1 <- as.numeric(men_DF$age == 1)
+men_DF$age_2 <- as.numeric(men_DF$age == 2)
+men_DF$age_3 <- as.numeric(men_DF$age == 3)
+head(men_DF)
+
+lm_fit_4 = lm(emails ~ rating + height + bmi + yrs_education + days_active + age_2 + age_3, data = men_DF)
+summary(lm_fit_4)
+```
+
+### Question 9 Based on the results from the previous regression, how do you interpret the effect of age on men's popularity? 
+
+- In the previous regression, age = 1 is the base category. The coefficient on age_2, 1.52, indicates that uses in age category 2 (age 36-40) receive 1.52 more e-mails on average than users in age category 1 (age 31-35). The coefficient on age_3, 3.02,indicates that users in age category 3 (age 41-45) receive 3.02 more e-mails on average than users in agecategory 1. 
+
+### Question 10 Compare the results for the regression model estimated in Question 8 (which uses all the variables in the data) for men and women. What are the differences? Based on your findings, what types of men and women do you want to attract to your site? 
+
+- In the women's dataset, it shows that users in an older age category tend to receive fewer emails. However, on the contrary, male users in an older category receive more emails. Thus, based on my findings, I want to attract female users in age category 1 (age 31-35) and male users in age category 3 (age 41-45) to the site.
+
+### Question 11 Finally, explore the impact of interactions and non-linear regression terms for the men's dataset.  
+
+### Question 11a First, run a model that adds a quadratic height term to the model in Question 8 (rating, height, bmi, education, days active and age (as categorical) as independent variables and emails as the dependent variable). Then, interpret the coefficients involving height. What pattern of height preferences corresponds to such coefficients?  Can this pattern be seen in the data?
+
+```{r code_11}
+lm_fit_5 = lm(emails ~ rating + height + bmi + yrs_education + days_active + factor(age) + I(height^2), data = men_DF)
+summary(lm_fit_5)
+```
+- Since height appears in the model with both linear and quadratic terms. We can no longer interpret the height coefficients separately. We can conclude that the contribution to the number of predicted e-mails from height(h) is 6.15xh - 0.04xh^2. 
+
+- The curvilinear relationship between height and emails can be seen in the data. Below is the plot:
+
+```{r height_plot}
+plot(men_DF$height, men_DF$emails,
+     main = "E-mails vs. Height", 
+     xlab = "Height", ylab = "E-mails")
+```
+
+
+
+### Question 11b Next, run a model that adds the interaction of age (as a categorical variable) with rating to the model in Question 8 (rating, height, bmi, education, days active and age (as categorical) as independent variables and emails as the dependent variable). Then, interpret the coefficients involving rating and age.  What does the significance of the interaction coefficients indicate?  
+
+```{r code_12, tidy = FALSE}
+lm_fit_6 = lm(emails ~ rating + height + bmi + yrs_education + days_active + factor(age) + factor(age):rating, data = men_DF)
+summary(lm_fit_6)
+```
+
+- The presence of interactions implies that coefficients contribute different amount to predicted emails, depending on the value of the related variables. In this regression model, age group 1 is the base category.
+
+rating: for age group 1, increasing rating by 1 point increases emails by 7.53.
+factor(age)2: for rating=0, age group 2 members receive 1.44 more emails than group 1
+factor(age)3: for rating=0, age group 3 members receive 3.11 more emails group 1
+rating:factor(age)2: relative to age group 1, group 2 members receive -1.28 fewer emails for each additionalrating point. I.e., group 2 members receive 7.53-1.28=6.25 more emails for each additional rating point.
+rating:factor(age)3: relative to age group 1, group 3 members receive -0.28 fewer emails for each additionalrating point. I.e., group 2 members receive 7.53-0.28=7.25 more emails for each additional rating point.
+
+
+
+
+
+
+
